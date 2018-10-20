@@ -1,6 +1,13 @@
 const router = require("express").Router();
 const multer = require("multer");
-const upload = multer({ dest: "uploads/" });
+const imageFilter = function(req, file, cb) {
+    // accept image only
+    if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+        return cb(new Error("Only image files are allowed!"), false);
+    }
+    cb(null, true);
+};
+const upload = multer({ dest: "uploads/", fileFilter: imageFilter });
 
 router.get("/", (req, res) => {
     res.json({

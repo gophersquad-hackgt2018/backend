@@ -2,9 +2,13 @@ const crop = require('./crop')
 const axios = require('axios')
 const fs = require('fs')
 const latex = require('node-latex')
+const style = require('./defaultStyle')
+const {spawn} = require('child_process')
+const Readable = require('stream').Readable
+
 require('dotenv').config()
 
-async function process(filename, appid, appkey) {
+async function processImage(filename, appid, appkey) {
   console.log(`PROCESSING ${filename}`)
   let croppedFiles = crop.getCrops(filename)
   console.log(`FINISHED PROCESSING ${filename}`)
@@ -36,14 +40,56 @@ async function process(filename, appid, appkey) {
     }
   })
   Promise.all(jobs).then(() => {
-    let outLatex = ""
+    let outLatex = style.head
     responses.forEach(resp => {
-      outLatex += resp.replace(/\\\\/g, "\\") + " \\\\ \n"
+      outLatex += style.prefix + resp.replace(/\\\\/g, '\\') + style.postfix
     })
-    console.log(outLatex)
+    outLatex += style.tail
+    // console.log("________")
+    // console.log(outLatex)
+    // console.log("___________")
+    // const pdf = latex(outLatex)
+    // const output = fs.createWriteStream('./out.pdf')
+    // pdf.pipe(output).
+    //     on('error', err => console.error(err)).
+    //     on('finish', () => console.log('PDF Generated!'))
+    console.log( process.env.PATH );
+    const ls = spawn('ls')
+
+    // ls.stdout.on('data', (data) => {
+    //   console.log(`stdout: ${data}`);
+    // });
+    //
+    // ls.stderr.on('data', (data) => {
+    //   console.log(`stderr: ${data}`);
+    // });
+    //
+    // ls.on('close', (code) => {
+    //   console.log(`child process exited with code ${code}`);
+    // });
+    const child = spawn(`pdflatex`, ['-output-directory', 'pdfs', `-jobname=${filename}`]).on('error', function(err) {
+      console.log(err)
+    })
+    let stringStream = new Readable
+    stringStream.push(outLatex)
+    stringStream.push("\n")
+    stringStream.push(null)
+
+    child.stdout.on('data', (data) => {
+      console.log(`child stdout: ${data}`)
+    })
+    child.stderr.on('err', (err) => {
+      console.error(`child stderr:\n${err}`);
+    });
+    child.on('close', (code) => {
+      console.log(`child process exited with code ${code}`);
+    });
+    stringStream.pipe(child.stdin).stderr.on('err', (data) => {
+      console.error(`pipe stderr:\n${data}`);
+    })
   })
 }
 
 module.exports = {
-  process: process,
+  processImage: processImage,
 }

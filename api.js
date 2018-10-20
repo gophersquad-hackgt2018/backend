@@ -2,6 +2,8 @@ const router = require("express").Router();
 const Document = require("./models/Document");
 const multer = require("multer");
 const azure = require("azure-storage");
+const crops = require("./crops");
+
 const imageFilter = function(req, file, cb) {
     // accept image only
     if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
@@ -56,6 +58,7 @@ router.post("/upload", upload.single("image"), (req, res) => {
         success: true,
         message: "Image upload was successful"
     });
+    console.log(req.file)
 });
 
 module.exports = router;

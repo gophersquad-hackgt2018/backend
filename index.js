@@ -6,6 +6,8 @@ const bodyparser = require("body-parser");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const ws = require("./ws");
+ws.init(server);
 dotenv.config();
 
 /**

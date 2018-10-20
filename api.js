@@ -3,6 +3,7 @@ const Document = require("./models/Document");
 const multer = require("multer");
 const blob = require("./blob");
 const latexer = require("./latexer");
+const wsClient = require("./ws");
 
 const imageFilter = function(req, file, cb) {
     // accept image only
@@ -54,17 +55,20 @@ router.get("/documents", (req, res) => {
 });
 
 router.post("/upload", upload.single("image"), async (req, res) => {
+    const fileName = req.file.filename;
     res.json({
         success: true,
-        message: "Image upload was successful"
+        message: "Image upload was successful",
+        id: fileName
     });
     try {
-        const data = await latexer.processImage(req.file.filename);
+        const data = await latexer.processImage(fileName);
         const blobURL = await blob.uploadFile(data.fileName);
         const doc = await Document.create({
             url: blobURL
         });
         console.log(`New document created: ${doc}`);
+        wsClient.sendDocument(fileName, doc);
     } catch (err) {
         console.log(err);
     }

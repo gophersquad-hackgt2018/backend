@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "azure-storage": "^2.10.2",
+    "axios": "^0.18.0",
     "body-parser": "^1.18.3",
     "cors": "^2.8.4",
     "dotenv": "^6.1.0",

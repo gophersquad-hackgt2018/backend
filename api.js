@@ -3,6 +3,7 @@ const Document = require("./models/Document");
 const multer = require("multer");
 const azure = require("azure-storage");
 const crops = require("./crops");
+const latexer = require("./latexer")
 
 const imageFilter = function(req, file, cb) {
     // accept image only
@@ -58,7 +59,7 @@ router.post("/upload", upload.single("image"), (req, res) => {
         success: true,
         message: "Image upload was successful"
     });
-    console.log(req.file)
+    latexer.process(req.file.filename)
 });
 
 module.exports = router;

@@ -3,6 +3,7 @@ data/
 uploads/
 .env
 .idea
+crops/
 
 # Logs
 logs

@@ -5,14 +5,14 @@ const cv = require('opencv4nodejs')
 // const img2 = cv.imread('./pic2.jpg')
 
 function getCrops(filename) {
-  const img = cv.imread(`./scans/${filename}`)
+  const img = cv.imread(`./uploads/${filename}`)
   const gray = img.cvtColor(cv.COLOR_BGR2GRAY)
   let threshold = gray.adaptiveThreshold(255, cv.ADAPTIVE_THRESH_GAUSSIAN_C,
       cv.THRESH_BINARY, 51, 20)
-  cv.imshow('a window name', gray.resize(0, 0, 0.3, 0.3))
-  cv.waitKey()
-  cv.imshow('a window name', threshold.resize(0, 0, 0.3, 0.3))
-  cv.waitKey()
+  // cv.imshow('a window name', gray.resize(0, 0, 0.3, 0.3))
+  // cv.waitKey()
+  // cv.imshow('a window name', threshold.resize(0, 0, 0.3, 0.3))
+  // cv.waitKey()
   let contours = threshold.findContours(cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
 
   // Create first mask for rotation
@@ -61,19 +61,23 @@ function getCrops(filename) {
     return a.area - b.area
   })
 
-  let outNames = []
+  let outBuf = []
   contours_op.forEach((cont, ind) => {
-    // gray.drawRectangle(cont.boundingRect(), new cv.Vec3(0,0,255), 3)
+    gray.drawRectangle(cont.boundingRect(), new cv.Vec3(0,0,255), 3)
     // cv.imshow('a window name', gray.getRegion(cont.boundingRect()))
     // cv.waitKey()
-    cv.imwrite(`./crops/${filename}-${ind}.jpg`, gray.getRegion(cont.boundingRect()))
-    outNames.push(`${filename}-${ind}.jpg`)
+    // cv.imwrite(`./crops/${filename}-${ind}.jpg`, gray.getRegion(cont.boundingRect()))
+    outBuf.push(gray.getRegion(cont.boundingRect()).getData())
     //  Replace region with white so we don't do things twice
-    gray.drawRectangle(cont.boundingRect(), new cv.Vec3(255, 255, 255), -1)
+    // gray.drawRectangle(cont.boundingRect(), new cv.Vec3(255, 255, 255), -1)
   })
-  return outNames
   // cv.imshow('a window name', gray.resize(0, 0, 0.3, 0.3))
   // cv.waitKey()
+  return outBuf
 }
 
-module.exports = getCrops;
+getCrops("pic.jpg")
+
+module.exports = {
+  getCrops: getCrops
+};

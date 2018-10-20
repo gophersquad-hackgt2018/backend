@@ -1,8 +1,9 @@
 const router = require("express").Router();
 const Document = require("./models/Document");
 const multer = require("multer");
-const azure = require("azure-storage");
-const latexer = require("./latexer")
+const blob = require("./blob");
+const latexer = require("./latexer");
+const wsClient = require("./ws");
 
 const imageFilter = function(req, file, cb) {
     // accept image only
@@ -21,7 +22,7 @@ router.get("/", (req, res) => {
 });
 
 // Test endpoint for creating documents
-router.post("/documents", (req, res) => {
+router.post("/documents", (req, res, next) => {
     Document.create(req.body)
         .then(resp => {
             console.log(resp);
@@ -33,8 +34,23 @@ router.post("/documents", (req, res) => {
         })
         .catch(err => {
             console.log(err);
-            throw new Error("Error when creating document");
+            throw new Error("Error while deleting document");
         });
+});
+
+router.delete("/documents", async (req, res) => {
+    if (!req.body.id) {
+        throw new Error("No 'id' field found in request body");
+    }
+    try {
+        await Document.findByIdAndDelete(req.body.id);
+        res.json({
+            status: true,
+            message: "Successfully deleted document"
+        });
+    } catch (err) {
+        throw new Error("Error while deleting document");
+    }
 });
 
 router.get("/documents", (req, res) => {
@@ -53,12 +69,24 @@ router.get("/documents", (req, res) => {
         });
 });
 
-router.post("/upload", upload.single("image"), (req, res) => {
+router.post("/upload", upload.single("image"), async (req, res) => {
+    const fileName = req.file.filename;
     res.json({
         success: true,
-        message: "Image upload was successful"
+        message: "Image upload was successful",
+        id: fileName
     });
-    latexer.processImage(req.file.filename, process.env.MATHPIX_APPID, process.env.MATHPIX_APPKEY)
+    try {
+        const data = await latexer.processImage(fileName);
+        const blobURL = await blob.uploadFile(data.fileName);
+        const doc = await Document.create({
+            url: blobURL
+        });
+        console.log(`New document created: ${doc}`);
+        wsClient.sendDocument(fileName, doc);
+    } catch (err) {
+        console.log(err);
+    }
 });
 
 module.exports = router;

@@ -8,30 +8,30 @@ const Readable = require('stream').Readable
 
 require('dotenv').config()
 
-async function processImage(filename, appid, appkey) {
+async function processImage(filename) {
   console.log(`PROCESSING ${filename}`)
   let croppedFiles = crop.getCrops(filename)
   console.log(`FINISHED PROCESSING ${filename}`)
   let responses = []
-  console.log(croppedFiles)
-  const jobs = croppedFiles.map(async (croppedName) => {
-    // console.log('name', croppedName)
+  const jobs = croppedFiles.map(async croppedName => {
     const b64 = fs.readFileSync(`./crops/${croppedName}`, 'base64')
-    // console.log(b64)
     let imageURI = `data:image/jpg;base64,${b64}`
     let config = {
       headers: {
-        'app_id': appid,
-        'app_key': appkey,
+        app_id: process.env.APP_ID,
+        app_key: process.env.APP_KEY,
         'Content-type': 'application/json',
       },
     }
     try {
-      let response = await
-          axios.post('https://api.mathpix.com/v3/latex', {
+      let response = await axios.post(
+          'https://api.mathpix.com/v3/latex',
+          {
             src: imageURI,
             ocr: ['math', 'text'],
-          }, config)
+          },
+          config,
+      )
       if (response.data.latex) {
         responses.push(response.data.latex)
       }
@@ -46,54 +46,35 @@ async function processImage(filename, appid, appkey) {
       // align equals signs
       line = line.replace(/=/,'&=')
       outLatex += style.prefix + line + style.postfix
-      console.log("_____________")
-      console.log(resp)
-      console.log(outLatex)
-      console.log("_____________")
     })
     outLatex += style.tail
-    console.log(outLatex)
-    // console.log("________")
-    // console.log(outLatex)
-    // console.log("___________")
-    // const pdf = latex(outLatex)
-    // const output = fs.createWriteStream('./out.pdf')
-    // pdf.pipe(output).
-    //     on('error', err => console.error(err)).
-    //     on('finish', () => console.log('PDF Generated!'))
-    console.log( process.env.PATH );
-    const ls = spawn('ls')
-
-    // ls.stdout.on('data', (data) => {
-    //   console.log(`stdout: ${data}`);
-    // });
-    //
-    // ls.stderr.on('data', (data) => {
-    //   console.log(`stderr: ${data}`);
-    // });
-    //
-    // ls.on('close', (code) => {
-    //   console.log(`child process exited with code ${code}`);
-    // });
-    const child = spawn(`pdflatex`, ['-output-directory', 'pdfs', `-jobname=${filename}`]).on('error', function(err) {
+    const child = spawn(`pdflatex`, [
+      '-output-directory',
+      'pdfs',
+      `-jobname=${filename}`,
+    ]).on('error', function(err) {
       console.log(err)
     })
-    let stringStream = new Readable
+    let stringStream = new Readable()
     stringStream.push(outLatex)
-    stringStream.push("\n")
+    stringStream.push('\n')
     stringStream.push(null)
 
-    child.stdout.on('data', (data) => {
-      console.log(`child stdout: ${data}`)
+    // child.stdout.on("data", data => {
+    //     console.log(`child stdout: ${data}`);
+    // });
+    child.stderr.on('err', err => {
+      console.error(`child stderr:\n${err}`)
     })
-    child.stderr.on('err', (err) => {
-      console.error(`child stderr:\n${err}`);
-    });
-    child.on('close', (code) => {
-      console.log(`child process exited with code ${code}`);
-    });
-    stringStream.pipe(child.stdin).stderr.on('err', (data) => {
-      console.error(`pipe stderr:\n${data}`);
+    child.on('close', code => {
+      if (code == 0) {
+        console.log('SUCCESS')
+      } else {
+        console.log(`ERR: child process exited with code ${code}`)
+      }
+    })
+    stringStream.pipe(child.stdin).on('err', data => {
+      console.error(`pipe stderr:\n${data}`)
     })
   })
 }

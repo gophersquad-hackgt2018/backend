@@ -12,33 +12,6 @@ function getCrops(filename) {
   const gray = img.cvtColor(cv.COLOR_BGR2GRAY)
   let threshold = gray.adaptiveThreshold(255, cv.ADAPTIVE_THRESH_GAUSSIAN_C,
       cv.THRESH_BINARY, 201, 25)
-  // Median filter clears small details
-  // let medianBlurred = threshold.medianBlur(11)
-
-  // let bordered = medianBlurred.copyMakeBorder(5, 5, 5, 5, cv.BORDER_CONSTANT, new cv.Vec3(0,0,0))
-  // let edges = bordered.canny(200, 250)
-  // let conts = edges.findContours(cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-  // let height = edges.sizes[0]
-  // let width = edges.sizes[1]
-  // const MAX_CONTOUR_AREA = (width - 10) * (height - 10)
-  // let maxAreaFound = MAX_CONTOUR_AREA * 0.5
-  // let pageCont = new cv.Contour([[5, 5], [5, height-5], [width-5, height-5], [width-5, height-5]])
-  // conts.forEach(cont => {
-  //   let perimeter = cont.arcLength(true)
-  //   let approx = cont.approxPolyDP(0.03 * perimeter, true)
-  //
-  // //  Page has 4 corners and it is convex
-  // //  Page area must be bigger than maxAreaFound
-  //   if(approx.length == 4 && approx.isConvex && maxAreaFound < approx.area && approx.area < MAX_CONTOUR_AREA) {
-  //     maxAreaFound = approx.area
-  //     pageCont = approx
-  //   }
-  // })
-  //
-  //
-  //
-  //
-
   let blurred = threshold.gaussianBlur(new cv.Size(31, 31), 51, 3)
   let thresh2 = blurred.threshold(240, 255, cv.THRESH_BINARY)
   // blurred = threshold.gaussianBlur(new cv.Size(101, 101), 51, 7)
@@ -52,7 +25,6 @@ function getCrops(filename) {
   // cv.imshow('a window name', blurred.resize(0, 0, 0.4, 0.4))
   // cv.waitKey()
   let contours = thresh2.findContours(cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
-
   // Create first mask for rotation
   let mask = new cv.Mat(img.rows, img.cols, cv.CV_8U, 255)
 
@@ -66,7 +38,8 @@ function getCrops(filename) {
     if (size > 10000) {
       console.log(size)
     }
-    if (img.cols*img.rows/2 > size && size > 35 && w * 2.5 > h && h > img.cols*0.01) {
+    if (img.cols * img.rows / 2 > size && size > 35 && w * 2.5 > h && h >
+        img.cols * 0.01) {
       // console.log(cnt)
       mask.drawContours([cnt], new cv.Vec3(0, 0, 0), -1, cv.LINE_8, -1)
     }
@@ -79,8 +52,12 @@ function getCrops(filename) {
 
   // Remove holes
   let floodfill = threshold_op.copy()
-  let floodMask = new cv.Mat(threshold_op.sizes[0], threshold_op.sizes[1],
-      cv.CV_8U, 0)
+  let floodMask = new cv.Mat(
+      threshold_op.sizes[0],
+      threshold_op.sizes[1],
+      cv.CV_8U,
+      0,
+  )
   floodfill.floodFill(new cv.Point2(0, 0), 255)
   let floodfillInv = floodfill.bitwiseNot()
   let out = threshold_op.bitwiseOr(floodfillInv)
@@ -101,10 +78,11 @@ function getCrops(filename) {
 
   let names = []
   contours_op.forEach((cont, ind) => {
-    gray.drawRectangle(cont.boundingRect(), new cv.Vec3(0,0,255), 3)
+    gray.drawRectangle(cont.boundingRect(), new cv.Vec3(0, 0, 255), 3)
     // cv.imshow('a window name', threshold.getRegion(cont.boundingRect()))
     // cv.waitKey()
-    cv.imwrite(`./crops/${filename}-${ind}.jpg`, threshold.getRegion(cont.boundingRect()))
+    cv.imwrite(`./crops/${filename}-${ind}.jpg`,
+        threshold.getRegion(cont.boundingRect()))
     // out.push(gray.getRegion(cont.boundingRect()).getData())
     names.push(`${filename}-${ind}.jpg`)
     //  Replace region with white so we don't do things twice
@@ -137,5 +115,5 @@ function getCrops(filename) {
 // getCrops("../clean3.jpg")
 
 module.exports = {
-  getCrops: getCrops
-};
+  getCrops: getCrops,
+}

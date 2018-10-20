@@ -6,7 +6,6 @@ const style = require('./defaultStyle')
 const {spawn} = require('child_process')
 const Readable = require('stream').Readable
 const path = require('path')
-
 require('dotenv').config()
 
 async function processImage(filename) {

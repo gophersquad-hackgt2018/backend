@@ -1,8 +1,8 @@
 const router = require("express").Router();
 const Document = require("./models/Document");
 const multer = require("multer");
-const azure = require("azure-storage");
-const latexer = require("./latexer")
+const blob = require("./blob");
+const latexer = require("./latexer");
 
 const imageFilter = function(req, file, cb) {
     // accept image only
@@ -53,12 +53,21 @@ router.get("/documents", (req, res) => {
         });
 });
 
-router.post("/upload", upload.single("image"), (req, res) => {
+router.post("/upload", upload.single("image"), async (req, res) => {
     res.json({
         success: true,
         message: "Image upload was successful"
     });
-    latexer.processImage(req.file.filename, process.env.MATHPIX_APPID, process.env.MATHPIX_APPKEY)
+    try {
+        const data = await latexer.processImage(req.file.filename);
+        const blobURL = await blob.uploadFile(data.fileName);
+        const doc = await Document.create({
+            url: blobURL
+        });
+        console.log(`New document created: ${doc}`);
+    } catch (err) {
+        console.log(err);
+    }
 });
 
 module.exports = router;

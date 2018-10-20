@@ -6,7 +6,7 @@ const bodyparser = require("body-parser");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const session = require("express-session");
-// const mongoose = require("mongoose");
+const mongoose = require("mongoose");
 dotenv.config();
 
 /**
@@ -60,16 +60,16 @@ app.use(function(err, req, res, next) {
 /**
  * Mongoose setup
  */
-// mongoose.connect(
-//     process.env.MONGO_URL,
-//     function(err) {
-//         if (err) throw err;
-//     }
-// );
-// mongoose.connection.on(
-//     "error",
-//     console.error.bind(console, "connection error:")
-// );
+mongoose.connect(
+    process.env.MONGO_URL,
+    function(err) {
+        if (err) throw err;
+    }
+);
+mongoose.connection.on(
+    "error",
+    console.error.bind(console, "connection error:")
+);
 
 server.listen(process.env.PORT || 3000, err => {
     if (err) {

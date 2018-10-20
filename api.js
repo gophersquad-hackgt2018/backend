@@ -17,7 +17,6 @@ router.get("/", (req, res) => {
 });
 
 router.post("/upload", upload.single("image"), (req, res) => {
-    console.log(`Image received with ${req.file.size} bytes`);
     res.json({
         success: true,
         message: "Image upload was successful"

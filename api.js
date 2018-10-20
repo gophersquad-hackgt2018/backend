@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const Document = require("./models/Document");
 const multer = require("multer");
+const azure = require("azure-storage");
 const imageFilter = function(req, file, cb) {
     // accept image only
     if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
@@ -11,7 +12,6 @@ const imageFilter = function(req, file, cb) {
 const upload = multer({ dest: "uploads/", fileFilter: imageFilter });
 
 router.get("/", (req, res) => {
-    Document.create({});
     res.json({
         success: true,
         message: "Server is healthy"

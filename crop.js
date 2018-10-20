@@ -5,15 +5,53 @@ const cv = require('opencv4nodejs')
 // const img2 = cv.imread('./pic2.jpg')
 
 function getCrops(filename) {
-  const img = cv.imread(`./uploads/${filename}`)
+  const inp = cv.imread(`./uploads/${filename}`)
+  // const borderWidth = Math.floor(inp.sizes[0]*0.1)
+  // const img = inp.copyMakeBorder(borderWidth, borderWidth, borderWidth, borderWidth, cv.BORDER_CONSTANT, new cv.Vec3(255,255,255))
+  const img = inp
   const gray = img.cvtColor(cv.COLOR_BGR2GRAY)
   let threshold = gray.adaptiveThreshold(255, cv.ADAPTIVE_THRESH_GAUSSIAN_C,
-      cv.THRESH_BINARY, 31, 20)
-  // cv.imshow('a window name', gray.resize(0, 0, 0.9, 0.9))
+      cv.THRESH_BINARY, 201, 25)
+  // Median filter clears small details
+  // let medianBlurred = threshold.medianBlur(11)
+
+  // let bordered = medianBlurred.copyMakeBorder(5, 5, 5, 5, cv.BORDER_CONSTANT, new cv.Vec3(0,0,0))
+  // let edges = bordered.canny(200, 250)
+  // let conts = edges.findContours(cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+  // let height = edges.sizes[0]
+  // let width = edges.sizes[1]
+  // const MAX_CONTOUR_AREA = (width - 10) * (height - 10)
+  // let maxAreaFound = MAX_CONTOUR_AREA * 0.5
+  // let pageCont = new cv.Contour([[5, 5], [5, height-5], [width-5, height-5], [width-5, height-5]])
+  // conts.forEach(cont => {
+  //   let perimeter = cont.arcLength(true)
+  //   let approx = cont.approxPolyDP(0.03 * perimeter, true)
+  //
+  // //  Page has 4 corners and it is convex
+  // //  Page area must be bigger than maxAreaFound
+  //   if(approx.length == 4 && approx.isConvex && maxAreaFound < approx.area && approx.area < MAX_CONTOUR_AREA) {
+  //     maxAreaFound = approx.area
+  //     pageCont = approx
+  //   }
+  // })
+  //
+  //
+  //
+  //
+
+  let blurred = threshold.gaussianBlur(new cv.Size(31, 31), 51, 3)
+  let thresh2 = blurred.threshold(240, 255, cv.THRESH_BINARY)
+  // blurred = threshold.gaussianBlur(new cv.Size(101, 101), 51, 7)
+  // thresh2 = blurred.threshold(235, 255, cv.THRESH_BINARY)
+  // blurred = threshold.gaussianBlur(new cv.Size(101, 101), 51, 7)
+  // thresh2 = blurred.threshold(235, 255, cv.THRESH_BINARY)
+  // cv.imshow('a window name', gray.resize(0, 0, 0.4, 0.4))
   // cv.waitKey()
-  // cv.imshow('a window name', threshold.resize(0, 0, 0.9, 0.9))
+  // cv.imshow('a window name', threshold.resize(0, 0, 0.4, 0.4))
   // cv.waitKey()
-  let contours = threshold.findContours(cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
+  // cv.imshow('a window name', blurred.resize(0, 0, 0.4, 0.4))
+  // cv.waitKey()
+  let contours = thresh2.findContours(cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
 
   // Create first mask for rotation
   let mask = new cv.Mat(img.rows, img.cols, cv.CV_8U, 255)
@@ -28,14 +66,14 @@ function getCrops(filename) {
     if (size > 10000) {
       console.log(size)
     }
-    if (10000 > size && size > 35 && w * 2.5 > h) {
+    if (img.cols*img.rows/2 > size && size > 35 && w * 2.5 > h && h > img.cols*0.01) {
       // console.log(cnt)
       mask.drawContours([cnt], new cv.Vec3(0, 0, 0), -1, cv.LINE_8, -1)
     }
   })
 
   // Connect neighbour contours and select the biggest one (text).
-  let kernel = new cv.Mat(25, 80, cv.CV_8U, 1)
+  let kernel = new cv.Mat(11, 100, cv.CV_8U, 1)
   let gray_op = mask.morphologyEx(kernel, cv.MORPH_OPEN)
   let threshold_op = gray_op.threshold(170, 255, cv.THRESH_BINARY_INV)
 
@@ -48,22 +86,22 @@ function getCrops(filename) {
   let out = threshold_op.bitwiseOr(floodfillInv)
   let contours_op = out.findContours(cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
 
-  // cv.imshow('a window name', mask.resize(0, 0, 0.9, 0.9))
+  // cv.imshow('a window name', mask.resize(0, 0, 0.4, 0.4))
   // cv.waitKey()
-  // cv.imshow('a window name', gray_op.resize(0, 0, 0.9, 0.9))
+  // cv.imshow('a window name', gray_op.resize(0, 0, 0.4, 0.4))
   // cv.waitKey()
-  // cv.imshow('a window name', threshold_op.resize(0, 0, 0.9, 0.9))
+  // cv.imshow('a window name', threshold_op.resize(0, 0, 0.4, 0.4))
   // cv.waitKey()
-  // cv.imshow('a window name', out.resize(0, 0, 0.9, 0.9))
+  // cv.imshow('a window name', out.resize(0, 0, 0.4, 0.4))
   // cv.waitKey()
 
-  // contours_op.sort((a, b) => {
-  //   return a.area - b.area
-  // })
+  contours_op.sort((a, b) => {
+    return a.boundingRect().y - b.boundingRect().y
+  })
 
   let names = []
   contours_op.forEach((cont, ind) => {
-    // gray.drawRectangle(cont.boundingRect(), new cv.Vec3(0,0,255), 3)
+    gray.drawRectangle(cont.boundingRect(), new cv.Vec3(0,0,255), 3)
     // cv.imshow('a window name', threshold.getRegion(cont.boundingRect()))
     // cv.waitKey()
     cv.imwrite(`./crops/${filename}-${ind}.jpg`, threshold.getRegion(cont.boundingRect()))
@@ -72,13 +110,31 @@ function getCrops(filename) {
     //  Replace region with white so we don't do things twice
     gray.drawRectangle(cont.boundingRect(), new cv.Vec3(255, 255, 255), -1)
   })
-  // cv.imshow('a window name', gray.resize(0, 0, 0.9, 0.9))
-  // cv.waitKey()
+  cv.imshow('a window name', gray.resize(0, 0, 0.4, 0.4))
+  cv.waitKey()
   console.log(names)
   return names
 }
 
-// getCrops("pic.jpg")
+// function fourCornerSort(points) {
+//   dif = []
+//   sum = []
+//   points.forEach(pnt => {
+//     dif.push(pnt[0]-pnt[1])
+//     sum.push(pnt[0]+pnt[1])
+//   })
+//   let tl = points[points.indexOf(Math.min(...sum))]
+//   let bl = points[points.indexOf(Math.max(...dif))]
+//   let br = points[points.indexOf(Math.max(...sum))]
+//   let tr = points[points.indexOf(Math.min(...dif))]
+//   return [tl, bl, br, tr]
+// }
+//
+// function contourOffset(cnt, offset) {
+//   cnt.getPoints()
+// }
+
+// getCrops("../clean3.jpg")
 
 module.exports = {
   getCrops: getCrops

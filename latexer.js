@@ -42,9 +42,17 @@ async function processImage(filename, appid, appkey) {
   Promise.all(jobs).then(() => {
     let outLatex = style.head
     responses.forEach(resp => {
-      outLatex += style.prefix + resp.replace(/\\\\/g, '\\') + style.postfix
+      let line = resp.replace(/\\\\\S]/g, '\\')
+      // align equals signs
+      line = line.replace(/=/,'&=')
+      outLatex += style.prefix + line + style.postfix
+      console.log("_____________")
+      console.log(resp)
+      console.log(outLatex)
+      console.log("_____________")
     })
     outLatex += style.tail
+    console.log(outLatex)
     // console.log("________")
     // console.log(outLatex)
     // console.log("___________")

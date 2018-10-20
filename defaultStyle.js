@@ -2,11 +2,11 @@ const style = {
   head: "\\documentclass[12pt]{article}" +
       "\\usepackage{amsmath}" +
       "\\begin{document}" +
-      "\\begin{align*}",
-  tail: "\\end{align*}" +
+      "\\begin{align*} \n",
+  tail: "\n \\end{align*}" +
       "\\end{document}",
-  prefix: "&",
-  postfix: "\\\\"
+  prefix: " ",
+  postfix: "\\\\ "
 }
 
 module.exports = style

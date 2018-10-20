@@ -14,7 +14,7 @@ async function processImage(filename) {
     let croppedFiles = crop.getCrops(filename)
     console.log(`FINISHED PROCESSING ${filename}`)
     let responses = []
-    croppedFiles.map(async (croppedName, idx) => {
+    let jobs = croppedFiles.map(async (croppedName, idx) => {
       const b64 = fs.readFileSync(`./crops/${croppedName}`, 'base64')
       let imageURI = `data:image/jpg;base64,${b64}`
       let config = {

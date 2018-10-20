@@ -57,9 +57,9 @@ function getCrops(filename) {
   // cv.imshow('a window name', out.resize(0, 0, 0.9, 0.9))
   // cv.waitKey()
 
-  contours_op.sort((a, b) => {
-    return a.area - b.area
-  })
+  // contours_op.sort((a, b) => {
+  //   return a.area - b.area
+  // })
 
   let names = []
   contours_op.forEach((cont, ind) => {

@@ -4,6 +4,7 @@ uploads/
 .env
 .idea
 crops/
+pdfs/
 
 # Logs
 logs

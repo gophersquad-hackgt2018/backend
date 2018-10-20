@@ -58,7 +58,7 @@ router.post("/upload", upload.single("image"), (req, res) => {
         success: true,
         message: "Image upload was successful"
     });
-    latexer.process(req.file.filename, process.env.MATHPIX_APPID, process.env.MATHPIX_APPKEY)
+    latexer.processImage(req.file.filename, process.env.MATHPIX_APPID, process.env.MATHPIX_APPKEY)
 });
 
 module.exports = router;

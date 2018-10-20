@@ -2,7 +2,6 @@ const router = require("express").Router();
 const Document = require("./models/Document");
 const multer = require("multer");
 const azure = require("azure-storage");
-const crops = require("./crops");
 const latexer = require("./latexer")
 
 const imageFilter = function(req, file, cb) {
@@ -59,7 +58,7 @@ router.post("/upload", upload.single("image"), (req, res) => {
         success: true,
         message: "Image upload was successful"
     });
-    latexer.process(req.file.filename)
+    latexer.process(req.file.filename, process.env.MATHPIX_APPID, process.env.MATHPIX_APPKEY)
 });
 
 module.exports = router;

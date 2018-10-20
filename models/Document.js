@@ -5,5 +5,5 @@ const documentSchema = new mongoose.Schema({
     date: { type: Date, default: Date.now }
 });
 
-const Document = mongoose.model("Document", userSchema);
+const Document = mongoose.model("Document", documentSchema);
 module.exports = Document;

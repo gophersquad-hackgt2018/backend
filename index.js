@@ -5,7 +5,6 @@ const server = http.createServer(app);
 const bodyparser = require("body-parser");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const session = require("express-session");
 const mongoose = require("mongoose");
 dotenv.config();
 
@@ -13,13 +12,6 @@ dotenv.config();
  * Middleware
  */
 app.use(cors());
-app.use(
-    session({
-        resave: false,
-        saveUninitialized: true,
-        secret: process.env.SESSION_SECRET
-    })
-);
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: true }));
 

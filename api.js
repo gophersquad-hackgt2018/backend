@@ -22,7 +22,7 @@ router.get("/", (req, res) => {
 });
 
 // Test endpoint for creating documents
-router.post("/documents", (req, res) => {
+router.post("/documents", (req, res, next) => {
     Document.create(req.body)
         .then(resp => {
             console.log(resp);
@@ -34,8 +34,23 @@ router.post("/documents", (req, res) => {
         })
         .catch(err => {
             console.log(err);
-            throw new Error("Error when creating document");
+            throw new Error("Error while deleting document");
         });
+});
+
+router.delete("/documents", async (req, res) => {
+    if (!req.body.id) {
+        throw new Error("No 'id' field found in request body");
+    }
+    try {
+        await Document.findByIdAndDelete(req.body.id);
+        res.json({
+            status: true,
+            message: "Successfully deleted document"
+        });
+    } catch (err) {
+        throw new Error("Error while deleting document");
+    }
 });
 
 router.get("/documents", (req, res) => {

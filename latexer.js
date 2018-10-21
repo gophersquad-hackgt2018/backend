@@ -6,6 +6,7 @@ const style = require("./defaultStyle");
 const {spawn} = require("child_process");
 const Readable = require("stream").Readable;
 const path = require("path");
+const spellchecker = require("./spellchecker");
 require("dotenv").config();
 
 async function processImage(filename) {
@@ -44,7 +45,6 @@ async function processImage(filename) {
             responses = responses.filter(el => el != null);
             let prom2 = new Promise(async (resolve, reject) => {
                 if (responses.length === 0) {
-                    console.log(1)
                     const b64 = fs.readFileSync(`./uploads/${filename}`, "base64");
                     let imageURI = `data:image/jpg;base64,${b64}`;
                     let config = {
@@ -74,8 +74,7 @@ async function processImage(filename) {
                     resolve();
                 }
             });
-            Promise.all([prom2]).then(() => {
-                console.log(3)
+            Promise.all([prom2]).then(async () => {
                 let outLatex = style.head;
                 responses.forEach(resp => {
                     let line = resp.replace(/\\\\\S]/g, "\\");
@@ -84,15 +83,16 @@ async function processImage(filename) {
                     if (!re.exec(line)) {
                         line = line.replace(/=/, "&=");
                     }
-                    // If find [a-zA-Z0-9]), then add type to stack
-                    re = /[a-zA-Z0-9][)\]]/g
-                    if (re.exec(line)) {
-
-                    }
+                    // // If find [a-zA-Z0-9]), then add type to stack
+                    // re = /[a-zA-Z0-9]*[)\]]/g;
+                    // let match = line.match(re);
+                    // if (match) {
+                    //     line = style.bulletPrefix.replace(/%%/, match) + line;
+                    // }
                     outLatex += style.prefix + line + style.postfix;
                 });
                 outLatex += style.tail;
-                console.log(outLatex);
+                outLatex = await spellchecker.check(outLatex);
                 const child = spawn(`pdflatex`, [
                     "-output-directory",
                     "pdfs",
@@ -126,7 +126,7 @@ async function processImage(filename) {
                     console.error(`pipe stderr:\n${data}`);
                 });
             });
-        })
+        });
     });
 }
 

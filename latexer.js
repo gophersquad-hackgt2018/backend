@@ -7,7 +7,9 @@ const {spawn} = require("child_process");
 const Readable = require("stream").Readable;
 const path = require("path");
 const spellchecker = require("./spellchecker");
+const translater = require("./translater");
 require("dotenv").config();
+const toLanguage = null;
 
 async function processImage(filename) {
     return new Promise(async (resolve, reject) => {
@@ -93,6 +95,9 @@ async function processImage(filename) {
                 });
                 outLatex += style.tail;
                 outLatex = await spellchecker.check(outLatex);
+                if (toLanguage != null) {
+                    outLatex = await translater.check(outLatex);
+                }
                 const child = spawn(`pdflatex`, [
                     "-output-directory",
                     "pdfs",

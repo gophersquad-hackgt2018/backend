@@ -3,13 +3,13 @@ const axios = require("axios");
 const fs = require("fs");
 const latex = require("node-latex");
 const style = require("./defaultStyle");
-const { spawn } = require("child_process");
+const {spawn} = require("child_process");
 const Readable = require("stream").Readable;
 const path = require("path");
 require("dotenv").config();
 
 async function processImage(filename) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         console.log(`PROCESSING ${filename}`);
         let croppedFiles = crop.getCrops(filename);
         console.log(`FINISHED PROCESSING ${filename}`);
@@ -40,20 +40,57 @@ async function processImage(filename) {
                 reject(err);
             }
         });
-        Promise.all(jobs).then(() => {
+        responses = responses.filter(el => el != null);
+        let prom2 = new Promise(async (resolve, reject) => {
+            if (responses.length === 0) {
+                const b64 = fs.readFileSync(`./uploads/${filename}`, "base64");
+                let imageURI = `data:image/jpg;base64,${b64}`;
+                let config = {
+                    headers: {
+                        app_id: process.env.MATHPIX_APP_ID,
+                        app_key: process.env.MATHPIX_APP_KEY,
+                        "Content-type": "application/json"
+                    }
+                };
+                try {
+                    let response = await axios.post(
+                        "https://api.mathpix.com/v3/latex",
+                        {
+                            src: imageURI,
+                            ocr: ["math", "text"]
+                        },
+                        config
+                    );
+                    console.log(1);
+                    if (response.data && response.data.latex && response.data.latex_confidence_rate > 0.5) {
+                        console.log(2);
+                        responses = [response.data.latex];
+                        resolve();
+                    }
+                } catch (err) {
+                    reject(err);
+                }
+            }
+        });
+        Promise.all([jobs, prom2]).then(() => {
+            console.log(3);
             let outLatex = style.head;
             responses.forEach(resp => {
                 let line = resp.replace(/\\\\\S]/g, "\\");
-                // align equals signs
-                line = line.replace(/=/, "&=");
+                // align equals signs, only if not in array
+                let re = /\\begin{array}/g;
+                if (!re.exec(line)) {
+                    line = line.replace(/=/, "&=");
+                }
                 outLatex += style.prefix + line + style.postfix;
             });
             outLatex += style.tail;
+            console.log(outLatex);
             const child = spawn(`pdflatex`, [
                 "-output-directory",
                 "pdfs",
                 `-jobname=${filename}`
-            ]).on("error", function(err) {
+            ]).on("error", function (err) {
                 console.log(err);
             });
             let stringStream = new Readable();

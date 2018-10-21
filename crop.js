@@ -88,8 +88,8 @@ function getCrops(filename) {
     //  Replace region with white so we don't do things twice
     gray.drawRectangle(cont.boundingRect(), new cv.Vec3(255, 255, 255), -1)
   })
-  cv.imshow('a window name', gray.resize(0, 0, 0.4, 0.4))
-  cv.waitKey()
+  // cv.imshow('a window name', gray.resize(0, 0, 0.4, 0.4))
+  // cv.waitKey()
   console.log(names)
   return names
 }

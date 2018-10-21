@@ -83,7 +83,6 @@ router.post("/upload", upload.single("image"), async (req, res, next) => {
     try {
         const data = await latexer.processImage(fileName);
         const jobs = [];
-        console.log(data.fileName);
         jobs.push(blob.uploadFile(data.fileName));
         jobs.push(pdfConverter.getPreviewImage(data.fileName));
         const jobOutputs = await Promise.all(jobs);

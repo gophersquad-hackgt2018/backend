@@ -2,14 +2,15 @@ const style = {
     head: "\\documentclass[12pt]{article}" +
         "\\usepackage{amsmath}" +
         "\\usepackage{enumerate}" +
-        "\\begin{document}" +
-        "\\begin{align*}",
-    tail: "\\end{align*}" +
-        "\\end{document}",
+        "\\usepackage{enumitem}" +
+        "\\begin{document}",
+    tail: "\\end{document}",
     prefix: " ",
     postfix: "\\\\ ",
-    bulletPrefix: "\\begin{itemize}[leftmargin=2.0cm,labelsep=0.5cm]\n" +
-        "\\item[%%] ",
+    alignPrefix: "\\begin{align*}",
+    alignSuffix: "\\end{align*}",
+    bulletPrefix: "\\begin{itemize}[leftmargin=2.0cm]\n",
+    bulletItem: "\\item[%%] ",
     bulletSuffix: "\\end{itemize}"
 };
 

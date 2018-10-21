@@ -84,6 +84,11 @@ async function processImage(filename) {
                     if (!re.exec(line)) {
                         line = line.replace(/=/, "&=");
                     }
+                    // If find [a-zA-Z0-9]), then add type to stack
+                    re = /[a-zA-Z0-9][)\]]/g
+                    if (re.exec(line)) {
+
+                    }
                     outLatex += style.prefix + line + style.postfix;
                 });
                 outLatex += style.tail;

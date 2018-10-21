@@ -61,14 +61,18 @@ function getCrops(filename) {
     let out = threshold_op.bitwiseOr(floodfillInv);
     let contours_op = out.findContours(cv.RETR_TREE, cv.CHAIN_APPROX_NONE);
 
-    cv.imshow('a window name', mask.resize(0, 0, 0.4, 0.4))
-    cv.waitKey()
-    cv.imshow('a window name', gray_op.resize(0, 0, 0.4, 0.4))
-    cv.waitKey()
-    cv.imshow('a window name', threshold_op.resize(0, 0, 0.4, 0.4))
-    cv.waitKey()
-    cv.imshow('a window name', out.resize(0, 0, 0.4, 0.4))
-    cv.waitKey()
+    // cv.imshow('a window name', mask.resize(0, 0, 0.4, 0.4))
+    // cv.waitKey()
+    // cv.imshow('a window name', gray_op.resize(0, 0, 0.4, 0.4))
+    // cv.waitKey()
+    // cv.imshow('a window name', threshold_op.resize(0, 0, 0.4, 0.4))
+    // cv.waitKey()
+    // cv.imshow('a window name', out.resize(0, 0, 0.4, 0.4))
+    // cv.waitKey()
+
+    contours_op = contours_op.filter(cnt => {
+        return img.cols * img.rows / 2 > cnt.area && cnt.area > 10;
+    })
 
     contours_op.sort((a, b) => {
         return a.boundingRect().y - b.boundingRect().y;
@@ -77,8 +81,8 @@ function getCrops(filename) {
     let names = [];
     contours_op.forEach((cont, ind) => {
         gray.drawRectangle(cont.boundingRect(), new cv.Vec3(0, 0, 255), 3);
-        cv.imshow('a window name', threshold.getRegion(cont.boundingRect()))
-        cv.waitKey()
+        // cv.imshow('a window name', threshold.getRegion(cont.boundingRect()))
+        // cv.waitKey()
         cv.imwrite(`./crops/${filename}-${ind}.jpg`,
             threshold.getRegion(cont.boundingRect()));
         // out.push(gray.getRegion(cont.boundingRect()).getData())

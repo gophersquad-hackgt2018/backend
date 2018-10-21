@@ -11,19 +11,20 @@ function getCrops(filename) {
     const img = inp;
     const gray = img.cvtColor(cv.COLOR_BGR2GRAY);
     let threshold = gray.adaptiveThreshold(255, cv.ADAPTIVE_THRESH_GAUSSIAN_C,
-        cv.THRESH_BINARY, 201, 25);
+        cv.THRESH_BINARY, 151, 25);
     let blurred = threshold.gaussianBlur(new cv.Size(31, 31), 51, 3);
+    blurred = blurred.medianBlur(11);
     let thresh2 = blurred.threshold(240, 255, cv.THRESH_BINARY);
     // blurred = threshold.gaussianBlur(new cv.Size(101, 101), 51, 7)
     // thresh2 = blurred.threshold(235, 255, cv.THRESH_BINARY)
     // blurred = threshold.gaussianBlur(new cv.Size(101, 101), 51, 7)
     // thresh2 = blurred.threshold(235, 255, cv.THRESH_BINARY)
-    // cv.imshow('a window name', gray.resize(0, 0, 0.4, 0.4))
-    // cv.waitKey()
-    // cv.imshow('a window name', threshold.resize(0, 0, 0.4, 0.4))
-    // cv.waitKey()
-    // cv.imshow('a window name', blurred.resize(0, 0, 0.4, 0.4))
-    // cv.waitKey()
+    cv.imshow('a window name', gray.resize(0, 0, 0.4, 0.4))
+    cv.waitKey()
+    cv.imshow('a window name', threshold.resize(0, 0, 0.4, 0.4))
+    cv.waitKey()
+    cv.imshow('a window name', blurred.resize(0, 0, 0.4, 0.4))
+    cv.waitKey()
     let contours = thresh2.findContours(cv.RETR_TREE, cv.CHAIN_APPROX_NONE);
     // Create first mask for rotation
     let mask = new cv.Mat(img.rows, img.cols, cv.CV_8U, 255);
@@ -60,14 +61,14 @@ function getCrops(filename) {
     let out = threshold_op.bitwiseOr(floodfillInv);
     let contours_op = out.findContours(cv.RETR_TREE, cv.CHAIN_APPROX_NONE);
 
-    // cv.imshow('a window name', mask.resize(0, 0, 0.4, 0.4))
-    // cv.waitKey()
-    // cv.imshow('a window name', gray_op.resize(0, 0, 0.4, 0.4))
-    // cv.waitKey()
-    // cv.imshow('a window name', threshold_op.resize(0, 0, 0.4, 0.4))
-    // cv.waitKey()
-    // cv.imshow('a window name', out.resize(0, 0, 0.4, 0.4))
-    // cv.waitKey()
+    cv.imshow('a window name', mask.resize(0, 0, 0.4, 0.4))
+    cv.waitKey()
+    cv.imshow('a window name', gray_op.resize(0, 0, 0.4, 0.4))
+    cv.waitKey()
+    cv.imshow('a window name', threshold_op.resize(0, 0, 0.4, 0.4))
+    cv.waitKey()
+    cv.imshow('a window name', out.resize(0, 0, 0.4, 0.4))
+    cv.waitKey()
 
     contours_op.sort((a, b) => {
         return a.boundingRect().y - b.boundingRect().y;
@@ -76,8 +77,8 @@ function getCrops(filename) {
     let names = [];
     contours_op.forEach((cont, ind) => {
         gray.drawRectangle(cont.boundingRect(), new cv.Vec3(0, 0, 255), 3);
-        // cv.imshow('a window name', threshold.getRegion(cont.boundingRect()))
-        // cv.waitKey()
+        cv.imshow('a window name', threshold.getRegion(cont.boundingRect()))
+        cv.waitKey()
         cv.imwrite(`./crops/${filename}-${ind}.jpg`,
             threshold.getRegion(cont.boundingRect()));
         // out.push(gray.getRegion(cont.boundingRect()).getData())

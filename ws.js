@@ -31,7 +31,6 @@ const sendDocument = (id, doc) => {
         console.log("ERR: undefined ID provided to sendDocument");
     } else {
         wss.clients.forEach(client => {
-            console.log(`Curr client id: ${client.id}`);
             if (client.id == id && client.readyState === WebSocket.OPEN) {
                 client.send(JSON.stringify(doc));
                 client.terminate();

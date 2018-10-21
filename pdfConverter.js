@@ -10,6 +10,10 @@ pdf2img.setOptions({
 
 const getPreviewImage = async filePath => {
     return new Promise((resolve, reject) => {
+        const base = path.basename(filePath);
+        pdf2img.setOptions({
+            outputname: base
+        });
         pdf2img.convert(filePath, function(err, res) {
             if (err) reject(err);
             else {

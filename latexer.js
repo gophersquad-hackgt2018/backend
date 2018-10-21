@@ -3,7 +3,7 @@ const axios = require("axios");
 const fs = require("fs");
 const latex = require("node-latex");
 const style = require("./defaultStyle");
-const { spawn, exec } = require("child_process");
+const { spawn } = require("child_process");
 const Readable = require("stream").Readable;
 const path = require("path");
 require("dotenv").config();
@@ -48,7 +48,6 @@ async function processImage(filename) {
             responses = responses.filter(el => el != null);
             let prom2 = new Promise(async (resolve, reject) => {
                 if (responses.length === 0) {
-                    console.log(1);
                     const b64 = fs.readFileSync(
                         `./uploads/${filename}`,
                         "base64"
@@ -86,7 +85,6 @@ async function processImage(filename) {
                 }
             });
             Promise.all([prom2]).then(() => {
-                console.log(3);
                 let outLatex = style.head;
                 responses.forEach(resp => {
                     let line = resp.replace(/\\\\\S]/g, "\\");
@@ -103,9 +101,6 @@ async function processImage(filename) {
                 });
                 outLatex += style.tail;
                 console.log(outLatex);
-                exec("ls", (err, res) => {
-                    console.log(res);
-                });
                 const child = spawn(`pdflatex`, [
                     "-output-directory",
                     "pdfs",

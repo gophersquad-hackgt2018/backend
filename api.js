@@ -81,7 +81,6 @@ router.post("/upload", upload.single("image"), async (req, res, next) => {
         id: fileName
     });
     try {
-        console.log(fileName);
         const data = await latexer.processImage(fileName);
         const jobs = [];
         jobs.push(blob.uploadFile(data.fileName));

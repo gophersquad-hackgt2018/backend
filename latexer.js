@@ -77,23 +77,42 @@ async function processImage(filename) {
                 }
             });
             Promise.all([prom2]).then(async () => {
-                let outLatex = style.head;
+                let outLatex = style.head + style.alignPrefix;
+                let bulletMode = false;
                 responses.forEach(resp => {
+                    console.log("_______");
+                    console.log(resp);
                     let line = resp.replace(/\\\\\S]/g, "\\");
                     // align equals signs, only if not in array
                     let re = /\\begin{array}/g;
                     if (!re.exec(line)) {
                         line = line.replace(/=/, "&=");
                     }
-                    // // If find [a-zA-Z0-9]), then add type to stack
-                    // re = /[a-zA-Z0-9]*[)\]]/g;
-                    // let match = line.match(re);
-                    // if (match) {
-                    //     line = style.bulletPrefix.replace(/%%/, match) + line;
-                    // }
+                    // If find [a-zA-Z0-9]), then add type to stack
+                    re = /^(?:\\text { ?)?[a-zA-Z0-9]* ?[)\]](?: ?})?/g;
+                    let match = line.match(re);
+                    if (match) {
+                        console.log("FOUND BULLET");
+                        console.log("(1): ", line);
+                        line = line.replace(re, "");
+                        console.log("(2): ", line);
+                        if (!bulletMode) {
+                            line = style.alignSuffix + style.bulletPrefix + style.bulletItem.replace(/%%/, match) + style.alignPrefix + line;
+                            bulletMode = true;
+                        } else {
+                            line = style.alignSuffix + style.bulletItem.replace(/%%/, match) + style.alignPrefix + line;
+                        }
+                    }
+                    console.log(line);
                     outLatex += style.prefix + line + style.postfix;
                 });
+                if (bulletMode) {
+                    outLatex += style.alignSuffix + style.bulletSuffix;
+                } else {
+                    outLatex += style.alignSuffix;
+                }
                 outLatex += style.tail;
+                console.log(outLatex);
                 outLatex = await spellchecker.check(outLatex);
                 if (toLanguage != null) {
                     outLatex = await translater.check(outLatex);

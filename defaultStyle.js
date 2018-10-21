@@ -3,7 +3,7 @@ const style = {
       "\\usepackage{amsmath}" +
       "\\begin{document}" +
       "\\begin{align*} \n",
-  tail: "\n \\end{align*}" +
+  tail: "\\end{align*}" +
       "\\end{document}",
   prefix: " ",
   postfix: "\\\\ "

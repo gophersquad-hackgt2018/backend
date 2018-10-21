@@ -60,14 +60,14 @@ function getCrops(filename) {
     let out = threshold_op.bitwiseOr(floodfillInv);
     let contours_op = out.findContours(cv.RETR_TREE, cv.CHAIN_APPROX_NONE);
 
-    cv.imshow('a window name', mask.resize(0, 0, 0.4, 0.4))
-    cv.waitKey()
-    cv.imshow('a window name', gray_op.resize(0, 0, 0.4, 0.4))
-    cv.waitKey()
-    cv.imshow('a window name', threshold_op.resize(0, 0, 0.4, 0.4))
-    cv.waitKey()
-    cv.imshow('a window name', out.resize(0, 0, 0.4, 0.4))
-    cv.waitKey()
+    // cv.imshow('a window name', mask.resize(0, 0, 0.4, 0.4))
+    // cv.waitKey()
+    // cv.imshow('a window name', gray_op.resize(0, 0, 0.4, 0.4))
+    // cv.waitKey()
+    // cv.imshow('a window name', threshold_op.resize(0, 0, 0.4, 0.4))
+    // cv.waitKey()
+    // cv.imshow('a window name', out.resize(0, 0, 0.4, 0.4))
+    // cv.waitKey()
 
     contours_op.sort((a, b) => {
         return a.boundingRect().y - b.boundingRect().y;

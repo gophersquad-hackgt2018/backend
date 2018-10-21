@@ -85,7 +85,9 @@ async function processImage(filename) {
                     let line = resp.replace(/\\\\\S]/g, "\\");
                     // align equals signs, only if not in array
                     let re = /\\begin{array}/g;
-                    if (!re.exec(line)) {
+                    let numMatches = line.split("=").length - 1
+                    console.log("numMatches", numMatches)
+                    if (!re.exec(line) && numMatches == 1) {
                         line = line.replace(/=/, "&=");
                     }
                     // If find [a-zA-Z0-9]), then add type to stack
@@ -152,6 +154,10 @@ async function processImage(filename) {
             });
         });
     });
+}
+
+const count = (str, re) => {
+    return ((str || '').match(re)|| []).length
 }
 
 module.exports = {

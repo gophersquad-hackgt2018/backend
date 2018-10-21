@@ -33,9 +33,8 @@ async function processImage(filename) {
                     },
                     config
                 );
-                console.log(`Responses order: ${idx}`);
-                if (response.data.latex && response.data.latex_confidence > 0.5) {
-                    responses[idx] = responses.data.latex;
+                if (response.data && response.data.latex && response.data.latex_confidence > 0.5) {
+                    responses[idx] = response.data.latex;
                 }
             } catch (err) {
                 reject(err);
@@ -50,7 +49,6 @@ async function processImage(filename) {
                 outLatex += style.prefix + line + style.postfix;
             });
             outLatex += style.tail;
-            console.log(outLatex)
             const child = spawn(`pdflatex`, [
                 "-output-directory",
                 "pdfs",

@@ -87,7 +87,7 @@ function getCrops(filename) {
     });
     // cv.imshow('a window name', gray.resize(0, 0, 0.4, 0.4))
     // cv.waitKey()
-    console.log(names);
+    // console.log(names);
     return names;
 }
 

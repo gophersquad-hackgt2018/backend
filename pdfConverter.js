@@ -5,19 +5,22 @@ const path = require("path");
 pdf2img.setOptions({
     type: "jpg",
     outputdir: path.resolve(__dirname, "pdfs"),
-    page: 1
+    page: 0
 });
 
 const getPreviewImage = async filePath => {
-    return new Promsise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
+        const base = path.basename(filePath);
+        pdf2img.setOptions({
+            outputname: base
+        });
         pdf2img.convert(filePath, function(err, res) {
             if (err) reject(err);
             else {
-                console.log(res);
-                resolve("test");
-                // blob.uploadFile(imagePath)
-                //     .then(resolve)
-                //     .catch(reject);
+                const imagePath = res.message[0].path;
+                blob.uploadFile(imagePath)
+                    .then(resolve)
+                    .catch(reject);
             }
         });
     });

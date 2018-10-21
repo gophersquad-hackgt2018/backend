@@ -3,7 +3,7 @@ const axios = require("axios");
 const fs = require("fs");
 const latex = require("node-latex");
 const style = require("./defaultStyle");
-const { spawn, exec } = require("child_process");
+const { spawn } = require("child_process");
 const Readable = require("stream").Readable;
 const path = require("path");
 const spellchecker = require("./spellchecker");
@@ -51,7 +51,10 @@ async function processImage(filename) {
             responses = responses.filter(el => el != null);
             let prom2 = new Promise(async (resolve, reject) => {
                 if (responses.length === 0) {
-                    const b64 = fs.readFileSync(`./uploads/${filename}`, "base64");
+                    const b64 = fs.readFileSync(
+                        `./uploads/${filename}`,
+                        "base64"
+                    );
                     let imageURI = `data:image/jpg;base64,${b64}`;
                     let config = {
                         headers: {
@@ -88,13 +91,13 @@ async function processImage(filename) {
                 let outLatex = style.head + style.alignPrefix;
                 let bulletMode = false;
                 responses.forEach(resp => {
-                    console.log("_______");
-                    console.log(resp);
+                    // console.log("_______");
+                    // console.log(resp);
                     let line = resp.replace(/\\\\\S]/g, "\\");
                     // align equals signs, only if not in array
                     let re = /\\begin{array}/g;
                     let numMatches = line.split("=").length - 1
-                    console.log("numMatches", numMatches)
+                    // console.log("numMatches", numMatches)
                     if (!re.exec(line) && numMatches == 1) {
                         line = line.replace(/=/, "&=");
                     }
@@ -102,10 +105,10 @@ async function processImage(filename) {
                     re = /^(?:\\text { ?)?[a-zA-Z0-9]* ?[)\]](?: ?})?/g;
                     let match = line.match(re);
                     if (match) {
-                        console.log("FOUND BULLET");
-                        console.log("(1): ", line);
+                        // console.log("FOUND BULLET");
+                        // console.log("(1): ", line);
                         line = line.replace(re, "");
-                        console.log("(2): ", line);
+                        // console.log("(2): ", line);
                         if (!bulletMode) {
                             line = style.alignSuffix + style.bulletPrefix + style.bulletItem.replace(/%%/, match) + style.alignPrefix + line;
                             bulletMode = true;
@@ -113,7 +116,7 @@ async function processImage(filename) {
                             line = style.alignSuffix + style.bulletItem.replace(/%%/, match) + style.alignPrefix + line;
                         }
                     }
-                    console.log(line);
+                    // console.log(line);
                     outLatex += style.prefix + line + style.postfix;
                 });
                 if (bulletMode) {

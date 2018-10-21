@@ -19,12 +19,12 @@ function getCrops(filename) {
     // thresh2 = blurred.threshold(235, 255, cv.THRESH_BINARY)
     // blurred = threshold.gaussianBlur(new cv.Size(101, 101), 51, 7)
     // thresh2 = blurred.threshold(235, 255, cv.THRESH_BINARY)
-    cv.imshow('a window name', gray.resize(0, 0, 0.4, 0.4))
-    cv.waitKey()
-    cv.imshow('a window name', threshold.resize(0, 0, 0.4, 0.4))
-    cv.waitKey()
-    cv.imshow('a window name', blurred.resize(0, 0, 0.4, 0.4))
-    cv.waitKey()
+    // cv.imshow('a window name', gray.resize(0, 0, 0.4, 0.4))
+    // cv.waitKey()
+    // cv.imshow('a window name', threshold.resize(0, 0, 0.4, 0.4))
+    // cv.waitKey()
+    // cv.imshow('a window name', blurred.resize(0, 0, 0.4, 0.4))
+    // cv.waitKey()
     let contours = thresh2.findContours(cv.RETR_TREE, cv.CHAIN_APPROX_NONE);
     // Create first mask for rotation
     let mask = new cv.Mat(img.rows, img.cols, cv.CV_8U, 255);

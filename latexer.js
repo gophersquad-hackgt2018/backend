@@ -3,7 +3,7 @@ const axios = require("axios");
 const fs = require("fs");
 const latex = require("node-latex");
 const style = require("./defaultStyle");
-const {spawn} = require("child_process");
+const { spawn, exec } = require("child_process");
 const Readable = require("stream").Readable;
 const path = require("path");
 require("dotenv").config();
@@ -33,7 +33,11 @@ async function processImage(filename) {
                     },
                     config
                 );
-                if (response.data && response.data.latex && response.data.latex_confidence_rate > 0.7) {
+                if (
+                    response.data &&
+                    response.data.latex &&
+                    response.data.latex_confidence_rate > 0.7
+                ) {
                     responses[idx] = response.data.latex;
                 }
             } catch (err) {
@@ -44,8 +48,11 @@ async function processImage(filename) {
             responses = responses.filter(el => el != null);
             let prom2 = new Promise(async (resolve, reject) => {
                 if (responses.length === 0) {
-                    console.log(1)
-                    const b64 = fs.readFileSync(`./uploads/${filename}`, "base64");
+                    console.log(1);
+                    const b64 = fs.readFileSync(
+                        `./uploads/${filename}`,
+                        "base64"
+                    );
                     let imageURI = `data:image/jpg;base64,${b64}`;
                     let config = {
                         headers: {
@@ -63,7 +70,11 @@ async function processImage(filename) {
                             },
                             config
                         );
-                        if (response.data && response.data.latex && response.data.latex_confidence_rate > 0.65) {
+                        if (
+                            response.data &&
+                            response.data.latex &&
+                            response.data.latex_confidence_rate > 0.65
+                        ) {
                             responses = [response.data.latex];
                             resolve();
                         }
@@ -75,7 +86,7 @@ async function processImage(filename) {
                 }
             });
             Promise.all([prom2]).then(() => {
-                console.log(3)
+                console.log(3);
                 let outLatex = style.head;
                 responses.forEach(resp => {
                     let line = resp.replace(/\\\\\S]/g, "\\");
@@ -85,19 +96,21 @@ async function processImage(filename) {
                         line = line.replace(/=/, "&=");
                     }
                     // If find [a-zA-Z0-9]), then add type to stack
-                    re = /[a-zA-Z0-9][)\]]/g
+                    re = /[a-zA-Z0-9][)\]]/g;
                     if (re.exec(line)) {
-
                     }
                     outLatex += style.prefix + line + style.postfix;
                 });
                 outLatex += style.tail;
                 console.log(outLatex);
+                exec("ls", (err, res) => {
+                    console.log(res);
+                });
                 const child = spawn(`pdflatex`, [
                     "-output-directory",
                     "pdfs",
                     `-jobname=${filename}`
-                ]).on("error", function (err) {
+                ]).on("error", function(err) {
                     console.log(err);
                 });
                 let stringStream = new Readable();
@@ -105,9 +118,6 @@ async function processImage(filename) {
                 stringStream.push("\n");
                 stringStream.push(null);
 
-                // child.stdout.on("data", data => {
-                //     console.log(`child stdout: ${data}`);
-                // });
                 child.stderr.on("err", err => {
                     console.error(`child stderr:\n${err}`);
                 });
@@ -126,7 +136,7 @@ async function processImage(filename) {
                     console.error(`pipe stderr:\n${data}`);
                 });
             });
-        })
+        });
     });
 }
 

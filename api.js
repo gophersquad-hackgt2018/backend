@@ -4,6 +4,7 @@ const multer = require("multer");
 const blob = require("./blob");
 const latexer = require("./latexer");
 const wsClient = require("./ws");
+const pdfConverter = require("./pdfConverter");
 
 const imageFilter = function(req, file, cb) {
     // accept image only
@@ -34,7 +35,7 @@ router.post("/documents", (req, res, next) => {
         })
         .catch(err => {
             console.log(err);
-            throw new Error("Error while deleting document");
+            next(new Error("Error while deleting document"));
         });
 });
 
@@ -69,7 +70,10 @@ router.get("/documents", (req, res) => {
         });
 });
 
-router.post("/upload", upload.single("image"), async (req, res) => {
+router.post("/upload", upload.single("image"), async (req, res, next) => {
+    if (!req.file) {
+        next(new Error("No file found"));
+    }
     const fileName = req.file.filename;
     res.json({
         success: true,
@@ -77,11 +81,17 @@ router.post("/upload", upload.single("image"), async (req, res) => {
         id: fileName
     });
     try {
+        console.log(fileName);
         const data = await latexer.processImage(fileName);
-        const blobURL = await blob.uploadFile(data.fileName);
+        const jobs = [];
+        jobs.push(blob.uploadFile(data.fileName));
+        jobs.push(pdfConverter.getPreviewImage(data.fileName));
+        const jobOutputs = await Promise.all(jobs);
         const doc = await Document.create({
-            url: blobURL
+            url: jobOutputs[0],
+            previewURL: jobOutputs[1]
         });
+        console.log(jobOutputs);
         console.log(`New document created: ${doc}`);
         wsClient.sendDocument(fileName, doc);
     } catch (err) {

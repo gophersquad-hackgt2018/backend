@@ -7,6 +7,16 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const ws = require("./ws");
+const fs = require("fs");
+const path = require("path");
+
+if (!fs.existsSync(path.resolve(__dirname, "pdfs"))) {
+    fs.mkdirSync(path.resolve(__dirname, "pdfs"));
+}
+if (!fs.existsSync(path.resolve(__dirname, "crops"))) {
+    fs.mkdirSync(path.resolve(__dirname, "crops"));
+}
+
 ws.init(server);
 dotenv.config();
 
